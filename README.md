@@ -1,8 +1,8 @@
-# PatientSys v3 — Patient Record Management System
+# PatientSys  — Patient Record Management System
 
 PHP + MySQL + HTML/CSS/JS. Built for XAMPP/MAMP/LAMP. Timezone: **Asia/Manila**.
 
-## What's new in v3
+## What's new in PRMS
 
 - **Online booking** (`/book.php`) — patient self-service, no login.
 - **SMS + Email reminders** with per-patient consent (`consent_sms`,
@@ -25,13 +25,6 @@ PHP + MySQL + HTML/CSS/JS. Built for XAMPP/MAMP/LAMP. Timezone: **Asia/Manila**.
 3. Edit `config/database.php` if your DB credentials/`BASE_URL` differ.
 4. Open `http://localhost/patientsys/login.php`.
 
-### Demo accounts
-
-| Username | Password    | Role   |
-|----------|-------------|--------|
-| admin    | admin123    | admin  |
-| doctor   | doctor123   | doctor |
-| nurse    | nurse123    | nurse  |
 
 ### Patient online booking
 
