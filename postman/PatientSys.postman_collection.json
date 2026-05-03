@@ -1,1 +1,137 @@
-
+{
+  "info": {
+    "name": "PatientSys v3",
+    "_postman_id": "patientsys-v3-2026",
+    "description": "PatientSys REST + FHIR R4 + Online Booking + One-time QR Tokens. JWT auth, role-based, consent-enforced, rate-limited, audited.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost/patientsys" },
+    { "key": "token",   "value": "" }
+  ],
+  "item": [
+    {
+      "name": "0 · Discover · CapabilityStatement (no auth)",
+      "request": {
+        "auth": { "type": "noauth" },
+        "method": "GET",
+        "url": "{{baseUrl}}/api/metadata.php"
+      }
+    },
+    {
+      "name": "1 · Auth · Login (admin)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const j = pm.response.json();",
+              "if (j.token) { pm.environment.set('token', j.token); pm.collectionVariables.set('token', j.token); console.log('JWT saved'); }",
+              "pm.test('200 OK', () => pm.response.to.have.status(200));",
+              "pm.test('has token', () => pm.expect(j.token).to.be.a('string'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": { "type": "noauth" },
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"
+        },
+        "url": "{{baseUrl}}/api/auth.php"
+      }
+    },
+    {
+      "name": "1b · Auth · Login (doctor)",
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [ "const j = pm.response.json(); if (j.token) pm.collectionVariables.set('token', j.token);" ] } }],
+      "request": {
+        "auth": { "type": "noauth" },
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{ \"username\": \"doctor\", \"password\": \"doctor123\" }" },
+        "url": "{{baseUrl}}/api/auth.php"
+      }
+    },
+    {
+      "name": "1c · Auth · Login (nurse)",
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [ "const j = pm.response.json(); if (j.token) pm.collectionVariables.set('token', j.token);" ] } }],
+      "request": {
+        "auth": { "type": "noauth" },
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{ \"username\": \"nurse\", \"password\": \"nurse123\" }" },
+        "url": "{{baseUrl}}/api/auth.php"
+      }
+    },
+    {
+      "name": "2 · REST · List patients",
+      "request": { "method": "GET", "url": "{{baseUrl}}/api/patients.php" }
+    },
+    {
+      "name": "2b · REST · Get patient by id",
+      "request": { "method": "GET", "url": "{{baseUrl}}/api/patient.php?id=1" }
+    },
+    {
+      "name": "3 · FHIR · Patient (search) — consenting only",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Accept", "value": "application/fhir+json" }],
+        "url": "{{baseUrl}}/api/fhir/Patient.php"
+      }
+    },
+    {
+      "name": "3b · FHIR · Patient by id (consenting → 200)",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Accept", "value": "application/fhir+json" }],
+        "url": "{{baseUrl}}/api/fhir/Patient.php?id=1"
+      }
+    },
+    {
+      "name": "3c · FHIR · Patient by id (NO consent → expect 403)",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Accept", "value": "application/fhir+json" }],
+        "url": "{{baseUrl}}/api/fhir/Patient.php?id=3"
+      }
+    },
+    {
+      "name": "4 · FHIR · Appointment search by patient",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Accept", "value": "application/fhir+json" }],
+        "url": "{{baseUrl}}/api/fhir/Appointment.php?patient=1"
+      }
+    },
+    {
+      "name": "5 · QR · Issue one-time token",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{ \"patient_id\": 1 }" },
+        "url": "{{baseUrl}}/api/qr_issue.php"
+      }
+    },
+    {
+      "name": "6 · Online Booking (PUBLIC, no auth)",
+      "request": {
+        "auth": { "type": "noauth" },
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Liza Mae\",\n  \"age\": 29,\n  \"gender\": \"Female\",\n  \"contact\": \"09171234567\",\n  \"email\": \"liza@example.com\",\n  \"appt_date\": \"2026-06-15\",\n  \"appt_time\": \"10:00\",\n  \"purpose\": \"Consultation\",\n  \"consent_sms\": true,\n  \"consent_email\": true\n}"
+        },
+        "url": "{{baseUrl}}/api/book.php"
+      }
+    }
+  ]
+}
