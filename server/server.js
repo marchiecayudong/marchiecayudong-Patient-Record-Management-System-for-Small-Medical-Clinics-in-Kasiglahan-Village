@@ -8,6 +8,15 @@ const db = mysql.createConnection({
   port: process.env.DB_PORT
 });
 
+app.get("/patients", (req, res) => {
+  db.query("SELECT * FROM patients", (err, result) => {
+    if (err) {
+      return res.status(500).json(err);
+    }
+    res.json(result);
+  });
+});
+
 db.connect((err) => {
   if (err) {
     console.error("❌ Database connection failed:", err);
